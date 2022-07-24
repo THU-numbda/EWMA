@@ -1,6 +1,7 @@
 # EWMA
-It's the example code for the submission of element wise matrix approximation algorithm
+It's the example code for the submission of element wise matrix approximation algorithm (ssrSVD and S3SPSD)
 
-test it can auot update
-
-
+# Run
+```
+python main.py
+```
