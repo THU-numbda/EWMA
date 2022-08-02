@@ -68,6 +68,24 @@ class FastSPSD(BaseEstimator):
         self.metric = metric
         self.rng = np.random.RandomState(seed)
 
+    # #implement the corresponding leverage_score in the paper
+    # #https://www.jmlr.org/papers/volume17/15-190/15-190.pdf, but show bad performance.
+    # def leverage_score(self,C,idx,s):
+    #     n,c = C.shape
+    #     p = np.linalg.matrix_rank(C)
+    #     [u,_,_] = linalg.svd(C,full_matrices=False)  
+    #     norml = [np.linalg.norm(u[i,:],2)**2 for i in range(0,n)] 
+    #     probability = [s*l/p for l in norml]
+    #     sum_pro = np.sum(probability)
+    #     probability = probability/sum_pro
+    #     new_idx = self.rng.choice(n,s,replace=False,p=probability)
+    #     out_idx = np.unique(list(idx)+list(new_idx))
+    #     s = len(out_idx)
+    #     out = np.zeros(s)
+    #     for i in range(0,s):
+    #         out[i] = np.sqrt(c/s/norml[out_idx[i]])
+    #     return out,out_idx
+
     # reference: https://arxiv.org/pdf/1505.07570.pdf and https://github.com/wangshusen/RandMatrixMatlab
     def leverage_score(self,C,idx,s):
         n,c = C.shape
@@ -96,7 +114,6 @@ class FastSPSD(BaseEstimator):
         #Q,_ = np.linalg.qr(C,mode='reduced')
         Q = C
         S,pos = self.leverage_score(Q,idx,self.s)
-        #pos = self.rng.choice(n,self.s,replace=False)
         if self.metric == "rbf":
             K_core = rbf_kernel(U[pos,:], U[pos,:], gamma=self.gamma).reshape(len(pos),len(pos))
         elif self.metric == "csrbf":
@@ -105,9 +122,6 @@ class FastSPSD(BaseEstimator):
         T = np.einsum('i,ij,j->ij',S,K_core,S)
         left = linalg.pinv(np.einsum('i,ij->ij',S,Q[pos,:]))
         right = linalg.pinv(np.einsum('ji,i->ji',Q[pos,:].T,S))
-        # T = K_core
-        # left = linalg.pinv(Q[pos,:])
-        # right = linalg.pinv(Q[pos,:].T)
 
         W = np.dot(np.dot(left,T),right)
         return Q,W
