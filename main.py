@@ -8,11 +8,11 @@ print(U.shape)
 dim = 50
 seed = 1
 
-gamma = 4.0
+gamma = 5.0
 metric = "rbf"
 K = rbf_kernel(U,U,gamma) 
 
-#gamma = 0.05
+#gamma = 0.1
 #metric = "csrbf"
 #K = construct_csRBF(U,U,gamma)
 
